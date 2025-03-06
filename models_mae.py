@@ -105,7 +105,7 @@ class MaskedAutoencoderViT(nn.Module):
         y_max = aff_sum_normalized.size(1)
         y_normalized = y.float().mean() / y_max
 
-        dynamic_mask_ratios = mask_ratio - mask_ratio_var + 2 * mask_ratio_var * y_normalized
+        dynamic_mask_ratios = base_mask_ratio - mask_ratio_var + 2 * mask_ratio_var * y_normalized
         len_keep = int(L * (1 - dynamic_mask_ratios))
 
         noise = torch.rand(N, L, device=x.device) / 2
@@ -174,7 +174,7 @@ class MaskedAutoencoderViT(nn.Module):
         loss = (loss * mask).sum() / mask.sum()
         return loss
 
-    def forward(self, imgs, base, var, d):
+    def forward(self, imgs, base=0.75, var=0.15, d=0.1):
         latent, mask, ids_restore = self.forward_encoder(imgs, base, var, d)
         pred = self.forward_decoder(latent, ids_restore)
         loss = self.forward_loss(imgs, pred, mask)
